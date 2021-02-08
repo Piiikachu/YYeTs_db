@@ -3,7 +3,7 @@ Across the Great Wall we can reach every corner in the world.
 
 sqlite3 database of YYeTs.
 
-# Install
+# Usage
 1. download latest release
 2. unzip
 3. open with sqlite3
