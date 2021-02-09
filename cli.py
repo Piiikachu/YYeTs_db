@@ -57,6 +57,7 @@ def getURLs(episodes: list):
 
 def getURL(episode: tuple):
     link = episode[-2]
+    print(link)
 
 
 
@@ -107,6 +108,9 @@ def search_season(cur: Cursor, movie_id: str):
     index2 = checkNum(fmtIndex, count2)
     search_episode(cur, movie_id, result[index-1][2], fmtList[index2-1])
 
+# todo: implement with regex or fuzzy match
+def deep_search(cur:Cursor,s:str):
+    return []
 
 def search(cur: Cursor):
     s = input('请输入剧名:\n')
@@ -114,19 +118,21 @@ def search(cur: Cursor):
     result = cur.fetchall()
     count = len(result)
     if count == 0:
-        print("未查询到相关内容")
-    else:
-        print()
-        print("共找到{}条记录".format(count))
-        for i, line in enumerate(result):
-            print(i+1, line[1:-3])
-        print()
-        movieIndex = input('请输入序号：1-{}\n'.format(count))
+        result==deep_search(cur,s)
+        if len(result)==0:
+            print("未查询到相关内容")
+            return
+    print()
+    print("共找到{}条记录".format(count))
+    for i, line in enumerate(result):
+        print(i+1, line[1:-3])
+    print()
+    movieIndex = input('请输入序号：1-{}\n'.format(count))
 
-        index = checkNum(movieIndex, count)
-        print()
-        print("查询《{}》:".format(result[index-1][1]))
-        search_season(cur, result[index-1][0])
+    index = checkNum(movieIndex, count)
+    print()
+    print("查询《{}》:".format(result[index-1][1]))
+    search_season(cur, result[index-1][0])
 
 
 if __name__ == "__main__":
