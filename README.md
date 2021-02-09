@@ -21,17 +21,55 @@ The cost is that you should download the whole database first (30M+ zip, 220M+ d
 
 ## Usage
 
+### Database
+
 1. download latest release
 2. unzip
 3. open with sqlite3
 4. search url with SQL
+
+### Python cli
+
+#### Prerequisites
+
+1. [download database](#Database) and unzip (yyets.db)
+2. python3 (test in 3.8 and 3.9)
+3. set pip mirror source at https://mirrors.tuna.tsinghua.edu.cn/help/pypi if are inside the GreatWall
+
+#### Install
+
+1. Clone the repo
+
+   ``` sh
+    git clone https://github.com/Piiikachu/YYeTs_db.git
+   ```
+
+2. ~~Install dependencies~~ (skip this step for now)
+
+   ``` sh
+    pip install -r requirement.txt
+   ```
+
+3. run cli.py
+
+   ``` sh
+    python ./cli.py
+   ```
+
+#### Settings
+
+1. set path to yyets.db
+2. start searching
 
 ## TBD
 
 * [x] upload tool script.
 * [x] update readme.md.
 * [ ] upgrade searching strategy. For now the searching is using `Left-Prefix Index Rule` for efficiency.
-* [ ] user interface with python CLI.
+* [x] user interface with python CLI.
+* [ ] multi-selection.
+* [ ] auto paste to clipboard.
+* [ ] TUI/GUI.
 
 ## Credits
 
