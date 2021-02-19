@@ -1,11 +1,26 @@
 import json
 import os
+import sqlite3
+from sqlite3.dbapi2 import Cursor
+
+
+class SqlError(Exception):
+    def __init__(self, msg) -> None:
+        self.msg = msg
+
+    def __str__(self) -> str:
+        return repr('SQL Error occurred, msg: '+self.msg)
 
 
 class AppCore():
     def __init__(self) -> None:
         self.CONFIG_PATH = 'config.json'
         self.config = self.getConfig()
+        self.conn = None
+
+    def __del__(self):
+        if self.conn is not None:
+            self.conn.close()
 
     def getConfig(self) -> dict:
         if os.path.exists(self.CONFIG_PATH):
@@ -27,7 +42,36 @@ class AppCore():
         self.config['dbPath'] = path
         self.setConfig(self.config)
 
+    def connect(self):
+        dbPath = self.getDBPath()
+        if dbPath is not None and os.path.exists(dbPath):
+            self.conn = sqlite3.connect(dbPath)
+        else:
+            raise SqlError(f'连接到数据库失败，请检查数据库路径 {dbPath}')
+
+    def query(self, sql: str) -> list:
+        if self.conn is not None:
+            result = self.conn.cursor().execute(sql)
+            return result.fetchall()
+        else:
+            raise SqlError(f'未连接到数据库')
+
+    def queryMovie(self, name: str) -> list:
+        if name.isalnum():
+            sql = f"SELECT * FROM movie_info WHERE enname LIKE '{name}%' "
+        else:
+            sql = f"SELECT * FROM movie_info WHERE cnname LIKE '{name}%' "
+        movies = self.query(sql)
+        return movies
+
+    def querySeason(self, movieId: str, seasonNum: str) -> list:
+        pass
+
+    def queryEpisode(self, movieId: str, seasonNum: str, episodeNum: str) -> list:
+        pass
+
 
 if __name__ == '__main__':
     core = AppCore()
-    print(core.getConfig())
+    core.connect()
+    print(core.queryMovie('friend'))
