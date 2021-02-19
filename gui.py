@@ -1,6 +1,6 @@
 import sqlite3
-from PySide6.QtWidgets import QApplication, QMainWindow, QTableView, QDialog
-from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QTableView, QDialog, QToolBar
+from PySide6.QtGui import QAction
 from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt
 
 import sys
@@ -11,8 +11,8 @@ import core
 class MovieModel(QAbstractTableModel):
     def __init__(self):
         super().__init__()
-        self.header = ['序号', '影片id', '中文名', '英文名', '别名', '类型', '地区']
-        self.movies = [('a', 'b', 'c', 'd', 'e', 'f')]
+        self.header = ['序号', '中文名', '英文名', '别名', '类型', '地区']
+        self.movies = []
 
     def rowCount(self, parent: QModelIndex) -> int:
         return len(self.movies)
@@ -28,10 +28,11 @@ class MovieModel(QAbstractTableModel):
         if index.isValid() and role == Qt.DisplayRole:
             if index.column() == 0:
                 return index.row()+1
-            return self.movies[index.row()][index.column()-1]
+            return self.movies[index.row()][index.column()]
 
     def update(self, movies: list):
         self.movies = movies
+        self.layoutChanged.emit()
 
 
 class SearchDialog(QDialog):
@@ -53,22 +54,38 @@ class MainWindow(QMainWindow):
         # todo: set icon
         # self.setWindowIcon(QIcon('icon/g2.png'))
 
-        file_menu = self.menuBar().addMenu("&File")
+        # file_menu = self.menuBar().addMenu("&File")
 
-        help_menu = self.menuBar().addMenu("&About")
+        # help_menu = self.menuBar().addMenu("&About")
 
         self.table = QTableView()
         self.model = MovieModel()
         self.table.setModel(self.model)
         self.setCentralWidget(self.table)
+
+        searchBar = QToolBar()
+        self.searchEdit = QLineEdit()
+        self.searchEdit.setPlaceholderText('请输入影片名称')
+        searchBtn = QAction('search', self)
+
+        searchBar.addWidget(self.searchEdit)
+        searchBtn.triggered.connect(self.search)
+        searchBar.addAction(searchBtn)
+
+        self.addToolBar(searchBar)
+
         self.loadDataBase()
+
+    def search(self):
+        movies = self.core.queryMovie(self.searchEdit.text())
+        self.model.update(movies)
 
     def loadDataBase(self):
         self.core = core.AppCore()
         try:
             self.core.connect()
         except core.SqlError:
-            SettingDialog().show()
+            SettingDialog(self).show()
 
 
 if __name__ == '__main__':
