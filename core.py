@@ -64,8 +64,10 @@ class AppCore():
         movies = self.query(sql)
         return movies
 
-    def querySeason(self, movieId: str, seasonNum: str) -> list:
-        pass
+    def querySeason(self, movieId: str) -> list:
+        sql = f"SELECT * FROM season_info WHERE movie_id='{movieId}' order by season_num"
+        seasons = self.query(sql)
+        return seasons
 
     def queryEpisode(self, movieId: str, seasonNum: str, episodeNum: str) -> list:
         pass

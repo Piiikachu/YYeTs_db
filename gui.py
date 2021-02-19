@@ -1,5 +1,5 @@
-import sqlite3
-from PySide6.QtWidgets import QApplication, QLineEdit, QMainWindow, QTableView, QDialog, QToolBar
+from season import SeasonWindow
+from PySide6.QtWidgets import QAbstractItemView, QApplication, QLineEdit, QMainWindow, QTableView, QDialog, QToolBar
 from PySide6.QtGui import QAction
 from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt
 
@@ -34,15 +34,8 @@ class MovieModel(QAbstractTableModel):
         self.movies = movies
         self.layoutChanged.emit()
 
-
-class SearchDialog(QDialog):
-    def __init__(self, parent: QMainWindow) -> None:
-        super(SearchDialog, self).__init__(parent)
-
-
-class SettingDialog(QDialog):
-    def __init__(self, parent: QMainWindow) -> None:
-        super(SearchDialog, self).__init__(parent)
+    def getMovie(self, index: QModelIndex):
+        return self.movies[index.row()]
 
 
 class MainWindow(QMainWindow):
@@ -58,8 +51,11 @@ class MainWindow(QMainWindow):
 
         # help_menu = self.menuBar().addMenu("&About")
 
-        self.table = QTableView()
         self.model = MovieModel()
+        self.table = QTableView()
+        self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.table.doubleClicked.connect(self.querySeason)
         self.table.setModel(self.model)
         self.setCentralWidget(self.table)
 
@@ -80,12 +76,21 @@ class MainWindow(QMainWindow):
         movies = self.core.queryMovie(self.searchEdit.text())
         self.model.update(movies)
 
+    def querySeason(self, index: QModelIndex):
+        movie = self.model.getMovie(index)
+        SeasonWindow(self, movie).show()
+
     def loadDataBase(self):
         self.core = core.AppCore()
         try:
             self.core.connect()
         except core.SqlError:
             SettingDialog(self).show()
+
+
+class SettingDialog(QDialog):
+    def __init__(self, parent: MainWindow) -> None:
+        super(SettingDialog, self).__init__(parent)
 
 
 if __name__ == '__main__':
