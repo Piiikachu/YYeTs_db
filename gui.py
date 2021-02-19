@@ -1,7 +1,7 @@
 import sqlite3
 from PySide6.QtWidgets import QApplication, QMainWindow, QTableView, QDialog
 from PySide6.QtGui import QIcon
-from PySide6.QtCore import QAbstractTableModel
+from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt
 
 import sys
 
@@ -11,10 +11,35 @@ import core
 class MovieModel(QAbstractTableModel):
     def __init__(self):
         super().__init__()
-        self.header = ['影片id', '中文名', '英文名', '别名', '类型', '地区']
+        self.header = ['序号', '影片id', '中文名', '英文名', '别名', '类型', '地区']
+        self.movies = [('a', 'b', 'c', 'd', 'e', 'f')]
+
+    def rowCount(self, parent: QModelIndex) -> int:
+        return len(self.movies)
+
+    def columnCount(self, parent: QModelIndex) -> int:
+        return len(self.header)
+
+    def headerData(self, section: int, orientation: Qt.Orientation, role: int):
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+            return self.header[section]
+
+    def data(self, index: QModelIndex, role: int):
+        if index.isValid() and role == Qt.DisplayRole:
+            if index.column() == 0:
+                return index.row()+1
+            return self.movies[index.row()][index.column()-1]
+
+    def update(self, movies: list):
+        self.movies = movies
 
 
 class SearchDialog(QDialog):
+    def __init__(self, parent: QMainWindow) -> None:
+        super(SearchDialog, self).__init__(parent)
+
+
+class SettingDialog(QDialog):
     def __init__(self, parent: QMainWindow) -> None:
         super(SearchDialog, self).__init__(parent)
 
@@ -33,24 +58,17 @@ class MainWindow(QMainWindow):
         help_menu = self.menuBar().addMenu("&About")
 
         self.table = QTableView()
+        self.model = MovieModel()
+        self.table.setModel(self.model)
         self.setCentralWidget(self.table)
         self.loadDataBase()
 
     def loadDataBase(self):
-        dbPath = core.getDBPath()
-        if dbPath == None:
-            # todo: database path setting dialog
-            print('path not found')
-            pass
-        self.connect = sqlite3.connect(dbPath)
-        self.cursor = self.connect.cursor()
-        query = "SELECT * FROM movie_info LIMIT 100"
-        self.cursor.execute(query)
-        result = self.cursor.fetchall()
-        if len(result) == 0:
-            print('movie not found')
-        for m in result:
-            print(m)
+        self.core = core.AppCore()
+        try:
+            self.core.connect()
+        except core.SqlError:
+            SettingDialog().show()
 
 
 if __name__ == '__main__':
