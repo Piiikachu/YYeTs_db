@@ -99,5 +99,6 @@ if __name__ == '__main__':
     app.setOrganizationDomain("ShitHappens.ltd")
     app.setApplicationName("YYeTs.db")
     mainwindow = MainWindow()
+    mainwindow.searchEdit.setText('west')
     mainwindow.show()
     sys.exit(app.exec_())

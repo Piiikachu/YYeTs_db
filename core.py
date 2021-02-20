@@ -60,7 +60,7 @@ class AppCore():
         if name.isalnum():
             sql = f"SELECT * FROM movie_info WHERE enname LIKE '{name}%' "
         else:
-            sql = f"SELECT * FROM movie_info WHERE cnname LIKE '{name}%' "
+            sql = f"SELECT * FROM movie_info WHERE cnname LIKE '{name}%' OR aliasname LIKE '{name}%' "
         movies = self.query(sql)
         return movies
 
@@ -69,8 +69,11 @@ class AppCore():
         seasons = self.query(sql)
         return seasons
 
-    def queryEpisode(self, movieId: str, seasonNum: str, episodeNum: str) -> list:
-        pass
+    def queryEpisode(self, movieId: str, seasonNum: str, format: str) -> list:
+        sql = f"SELECT * FROM episode_info WHERE movie_id='{movieId}' AND season='{seasonNum}' AND format='{format}' order by episode "
+        print(sql)
+        episodes = self.query(sql)
+        return episodes
 
 
 if __name__ == '__main__':
